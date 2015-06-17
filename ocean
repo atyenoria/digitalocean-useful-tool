@@ -20,15 +20,13 @@ IMG=/Users/jima/img/digi.png #termina-notifier の画像ぱす
 
 
 ###########################事前処理###################################
-echo "情報収集中"
-echo "\n"
+echo "My droplets:"
 tugboat droplets > tmp_droplets
 droplets_names_tmp=`cat tmp_droplets|awk '{print \$1}'`
 droplets_ids_tmp=`cat tmp_droplets|awk '{print $11}'|sed -e 's/)//g'`
 # echo $tmp_droplets
 # echo "\n\n"
 cat tmp_droplets
-echo "\n"
 #dropletの名前取得
 TIME=`date +"%Y/%m/%d/%R"`
 for x in $droplets_names_tmp;
@@ -65,6 +63,11 @@ done
 
 
 
+#     +++++++++++++++++++++++++++++++++++++++
+# +++++++ digital ocean useful tool v0.1 ++++++++
+#     +++++++++++++++++++++++++++++++++++++++
+
+
 ###########################条件分岐###################################
 
 ACTION_1="1) dropletのsnap shot後+破壊 (稼働droplet数:${#Array_droplet_id[@]})"
@@ -72,19 +75,12 @@ ACTION_2="2) dropletを全削除 (稼働droplet数:${#Array_droplet_id[@]})"
 ACTION_3="3) my-imageを削除（残す数 $BACK_NO in ${#Array_image_id[@]} )"
 ACTION_4="4) 最新snaped imageからdropletを作成 (現在の設定: Singapore, Memory 2GB, SSD 40GB)"
   cat << _EOB_
-
-
-
-    +++++++++++++++++++++++++++++++++++++++
-+++++++ digital ocean useful tool v0.1 ++++++++
-    +++++++++++++++++++++++++++++++++++++++
-
-
+---------------------------------------------------------------------------------
+現在可能なタスク一覧
 $ACTION_1
 $ACTION_2
 $ACTION_3
 $ACTION_4
-
 
 plese type above category number (1~4)
 _EOB_

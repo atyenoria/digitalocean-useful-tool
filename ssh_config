@@ -4,7 +4,6 @@
 require 'fileutils'
 require 'pp'
 
-IP_ADDRESS="128.199.202.233"
 
 class MySTDOUT
   def initialize(&proc)
