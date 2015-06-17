@@ -35,9 +35,28 @@ SSHCONF_BACKUP=SSHCONF+".org"
 
 
 
+printf <<"EOS"
+
+ssh-config 設定便利ツール
+1:既存のホストの置き換え
+2:新規ホストの追加
+
+EOS
 
 
 
+
+
+while true
+print "enter number\n"
+print ">"
+num_event = gets().chomp
+print "\n\n"
+break
+end 
+
+case num_event
+when "1" then
 FileUtils.mv(SSHCONF,SSHCONF_BACKUP)
 
 str = <<"EOS"
@@ -57,7 +76,6 @@ printf str
 		IP = gets().chomp
 		print "Port:"
 		Port = gets().chomp
-		print "++++++++++++++++++++++++++++++++++++++++++++++++++"
 		print "\n\n\n\n\n"
 		break
 	end	
@@ -133,10 +151,70 @@ Port #{Port}
 IdentityFile #{IDENT}
 LogLevel FATAL
 ForwardAgent yes
+StrictHostKeyChecking no
 PasswordAuthentication no
 EOS
 wfile.puts str
-puts "追加した文字列"
+puts "追加したブロック"
 printf str
 print "\n\n\n"
 }
+
+
+
+when "2" then
+
+
+
+open(SSHCONF,"a") {|wfile|
+############################ssh-conテンプレート(要設定)##############################
+while true
+  print "Alias name:"
+  Alias_name = gets().chomp
+  print "IP Adress:"
+  IP = gets().chomp
+  print "Port:"
+  Port = gets().chomp
+  print "\n\n\n\n\n"
+  break
+end 
+
+str = <<"EOS"
+
+
+Host #{Alias_name}
+Hostname #{IP}
+ServerAliveInterval 30
+User #{USER}
+Port #{Port}
+IdentityFile #{IDENT}
+LogLevel FATAL
+ForwardAgent yes
+StrictHostKeyChecking no
+PasswordAuthentication no
+
+
+EOS
+
+wfile.puts str
+puts "追加したブロック"
+printf str
+print "\n\n\n"
+}
+
+
+
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
