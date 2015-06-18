@@ -57,6 +57,7 @@ do
 # echo $x
 Array_image_id+=($x)
 done
+rm -f tmp_droplets tmp_images
 ###########################事前処理　ここまで###################################
 
 

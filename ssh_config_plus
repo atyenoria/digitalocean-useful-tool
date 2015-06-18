@@ -1,0 +1,144 @@
+#!/usr/bin/env ruby
+#ssh-config setting useful tool by atyenoria
+#if you have some problems with this, please contact me (eigotyoubunn30@gmail.com)
+require 'fileutils'
+require 'pp'
+
+
+class MySTDOUT
+  def initialize(&proc)
+    @proc = proc
+  end
+
+  def execute
+    tmp_file = "/tmp/#{File.basename(__FILE__)}.#{$$}"
+    old_stdout = $stdout.dup
+    $stdout.reopen(tmp_file)
+    @proc.call
+    $stdout.flush
+    $stdout.reopen old_stdout
+    data = nil
+    File.open(tmp_file) {|f| data = f.read}
+    File.unlink(tmp_file)
+    data
+  end
+end
+
+####################初期設定#########################
+
+IDENT="/Users/jima/.ssh/vagrant_do.pem"
+USER="jima" #今はalias host name と同じにしている
+SSHCONF="/Users/jima/.ssh/config"
+SSHCONF_BACKUP=SSHCONF+".org"
+
+####################初期設定　ここまで#########################
+
+ssh_array=[]
+open("tmp_droplets_ips") do |file|
+    while l = file.gets
+        ssh_array.push(l.chomp.split("\s"))
+    end
+end
+
+while true
+  print "ssh port:"
+  Port = gets().chomp
+  print "\n"
+  break
+end 
+
+for i in 0..ssh_array.length-1 do
+
+# smells of :reek:UnusedParameters :for template method.
+Alias_name = ssh_array[0][i]
+IP = ssh_array[1][i]
+
+FileUtils.cp(SSHCONF,SSHCONF_BACKUP)
+
+####################前処理#########################
+delete_str_array=[]
+open(SSHCONF,"w") {|wfile|
+delte_host=[]
+delte_host.push "Host #{Alias_name}"
+# delte_host.push "Host 192.168.200.200"
+# delte_host.push "Host 10.0.2.15"
+# delte_host.push "Host 192.168.200.199 "
+
+regex=""
+num=0
+delte_host.each{|temp|
+if num ==0 then
+regex=regex+"^"+temp
+else
+regex=regex+"|^"+temp  
+end
+num=num+1
+}
+
+toggle_target=false #trueの時に行が削除される
+
+############################指定ブロック削除##############################
+file = File.open(SSHCONF_BACKUP)
+file.each_line do |line|
+
+toggle_target=true if /#{regex}/ =~ line
+
+if toggle_target == true then
+	# puts "削除対象した文字列"
+	# str_tmp="#{file.lineno}: #{line}"
+	str_tmp="#{line}"
+  # puts str_tmp
+  delete_str_array.push(str_tmp)
+	toggle_target=false	if line =~ /^\n/
+  next
+end
+
+wfile.puts line
+end
+
+file.close
+}
+
+
+
+my_stdout = MySTDOUT.new do
+pp delete_str_array
+end
+data = my_stdout.execute
+puts "変更前"
+printf data.gsub(/(\\n|"|\[|\]|\,)/, "")
+print "\n"
+open(SSHCONF,"a") {|wfile|
+
+
+############################ssh-conテンプレート(要設定)##############################
+str = <<"EOS"
+Host #{Alias_name}
+Hostname #{IP}
+ServerAliveInterval 30
+User #{Alias_name}
+Port #{Port}
+IdentityFile #{IDENT}
+LogLevel FATAL
+ForwardAgent yes
+StrictHostKeyChecking no
+PasswordAuthentication no
+
+EOS
+wfile.puts str
+puts "変更後"
+printf str
+print "\n\n\n"
+}
+
+
+
+end
+
+
+
+
+
+
+
+

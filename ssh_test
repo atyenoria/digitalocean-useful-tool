@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+
+open("tmp_droplets_ips") do |file|
+    while l = file.gets
+        array = l.chomp.split("\s")
+        p array[1]
+    end
+end
